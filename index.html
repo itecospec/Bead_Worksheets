@@ -95,7 +95,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
     <div class="subsection-label">Bead &amp; Glue</div>
     <div class="row2"><div class="field"><label>Bead Batch Number</label><input type="text" id="bead_batch"></div><div class="field"><label>Bead Flow Rate</label><input type="text" id="bead_flow" placeholder="e.g. l/min"></div></div>
     <div class="row2"><div class="field"><label>Glue Batch Number</label><input type="text" id="glue_batch"></div><div class="field"><label>Glue Flow Rate</label><input type="text" id="glue_flow" placeholder="e.g. l/min"></div></div>
-    <div class="field"><label>Bead Density</label><input type="text" id="bead_density" placeholder="kg/m³"></div>
+    <div class="field"><label>Bead Density</label><input type="text" id="bead_density"></div>
 
     <div class="subsection-label">Equipment</div>
     <div class="row2"><div class="field"><label>Jet Size</label><input type="text" id="jet_size"></div><div class="field"><label>Nozzle Size</label><input type="text" id="nozzle_size"></div></div>
@@ -142,8 +142,6 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 
     <div class="field" id="f-signature"><label>Operative Signature <span class="req">*</span></label><div class="signature-pad-container"><canvas id="signatureCanvas" class="signature-canvas"></canvas><div class="signature-actions"><button type="button" class="signature-btn clear-signature" onclick="clearSignature()">Clear Signature</button></div></div><p class="info-note" style="margin-top:8px">Sign using your finger or stylus directly on screen.</p><span class="err-msg">Signature is required</span></div>
 
-    <div class="field" id="f-sig_date"><label>Date <span class="req">*</span></label><input type="date" id="sig_date"><span class="err-msg">Date is required</span></div>
-    <div class="field"><label>Additional Notes</label><textarea id="signoff_notes" placeholder="Any additional notes or observations..."></textarea></div>
 
     <div class="field"><label>Photos</label></div>
     <div style="border:2px dashed #a8d0a8;border-radius:8px;padding:1rem;text-align:center;cursor:pointer;background:#f8fff8" onclick="document.getElementById('photo_input').click()"><input type="file" id="photo_input" multiple accept="image/*" onchange="addPhotos(this)" style="display:none"><p style="font-size:13px;color:#4a8c4a;margin:0">&#128248; Tap to attach photos</p><p style="font-size:11px;color:#7ab07a;margin-top:4px">Multiple photos allowed — embedded in PDF</p></div>
