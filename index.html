@@ -163,8 +163,7 @@ function validate(){
   clearErrors();
   const errors=[];
   function req(fieldId,wrapperId,label){if(!v(fieldId)){const el=document.getElementById(wrapperId);if(el)el.classList.add('field-error');errors.push(label);}}
-  req('client','f-client','Client Name');req('address','f-address','Address');req('site_address','f-site_address','Site Address');req('operatives','f-operatives','Names of Operatives');req('install_date','f-install_date','Installation Date');req('survey','f-survey','Was a site survey performed?');req('approved','f-approved','Was the building approved for CWI?');req('holes_filled','f-holes_filled','Have all holes been filled?');req('sig_name','f-sig_name','Operative Name (Sign-off)');req('sig_date','f-sig_date','Sign-off Date');
-  if(!signatureDrawn){const el=document.getElementById('f-signature');if(el)el.classList.add('field-error');errors.push('Operative Signature');}
+  req('client','f-client','Client Name');req('address','f-address','Address');req('site_address','f-site_address','Site Address');req('operatives','f-operatives','Names of Operatives');req('install_date','f-install_date','Installation Date');req('survey','f-survey','Was a site survey performed?');req('approved','f-approved','Was the building approved for CWI?');req('holes_filled','f-holes_filled','Have all holes been filled?');req('sig_name','f-sig_name','Operative Name (Sign-off)');
   if(errors.length){const banner=document.getElementById('val-banner');document.getElementById('val-list').innerHTML=errors.map(e=>'<li>'+e+'</li>').join('');banner.style.display='block';banner.scrollIntoView({behavior:'smooth',block:'start'});return false;}
   return true;
 }
