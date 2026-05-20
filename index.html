@@ -35,8 +35,33 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 #val-banner strong{color:#cc0000;font-size:13px;display:block;margin-bottom:6px}
 #val-banner ul{margin:0;padding-left:1.25rem}
 #val-banner ul li{color:#cc0000;font-size:13px;margin-bottom:2px}
-.yna-group{display:flex;gap:1.25rem;padding:4px 0;flex-wrap:wrap}
-.yna-group label{display:flex;align-items:center;gap:5px;font-size:14px;cursor:pointer;color:#1a1a2e}
+.yna-group{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  padding:4px 0;
+}
+
+.yna-group label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:10px 6px;
+  border:1px solid #a8d0a8;
+  border-radius:10px;
+  background:#f8fff8;
+  font-size:13px;
+  font-weight:600;
+  color:#2d6a2d;
+  cursor:pointer;
+  text-align:center;
+}
+
+.yna-group input{
+  margin-right:5px;
+  width:auto;
+}
 .cert-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
 .cert-badge{background:#f0f7f0;border:1px solid #a8d0a8;border-radius:8px;padding:8px 12px;font-size:13px;color:#2d6a2d;font-weight:600;flex:1;min-width:140px}
 .cert-badge span{display:block;font-size:10px;color:#7ab07a;font-weight:400;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px}
