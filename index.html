@@ -291,6 +291,7 @@ async function generatePDF(){
     const rhsX=M+hw+8+qw/2+qw/2+4;
     doc.setFillColor(...LIGHTGREEN);doc.roundedRect(M+hw+8+qw+2,y+14,qw,12,2,2,'F');
     doc.setTextColor(...MIDGREEN);doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.text('RHS',M+hw+8+qw+2+qw/2,y+22,{align:'center'});
+    doc.text(String(rhsVal || '—'), M + hw + 8 + qw + 2 + qw + 4, y + 22);
     doc.setTextColor(...DARK);doc.setFontSize(8);doc.setFont('helvetica','bold');
     y+=h;
   }
