@@ -62,7 +62,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 </head>
 <body>
 <div class="top-header">
-  <img src="" alt="Ecospec Logo" onerror="this.style.display='none'">
+  <img id="ecologo" src="ecologo.png" alt="Ecospec Logo">
 </div>
  
 <h1>CW Site Installation Checksheet</h1>
@@ -79,7 +79,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
     <div class="field" id="f-address"><label>Address <span class="req">*</span></label><input type="text" id="address" placeholder="Client address"><span class="err-msg">Address is required</span></div>
     <div class="field" id="f-site_address"><label>Site Address <span class="req">*</span></label><input type="text" id="site_address" placeholder="Installation site address"><span class="err-msg">Site Address is required</span></div>
     <div class="field" id="f-operatives"><label>Names of Operatives <span class="req">*</span></label><input type="text" id="operatives" placeholder="Names of all operatives on site"><span class="err-msg">Names of Operatives is required</span></div>
-    <div class="field" id="f-install_date"><label>Installation Date <span class="req">*</span></label><input type="date" id="install_date"><span class="err-msg">Installation Date is required</span></div>
+    <div class="field" id="f-install_date"><label>Installation Date <span class="req">*</span></label><input type="text" id="install_date" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10"><span class="err-msg">Installation Date is required</span></div>
  
     <div class="subsection-label">Site Survey &amp; Approval</div>
     <div class="field" id="f-survey"><label>Was a site survey performed? <span class="req">*</span></label><select id="survey"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select><span class="err-msg">Please select an option</span></div>
@@ -178,13 +178,96 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 <script>
 function v(id){return(document.getElementById(id)||{}).value||'';}
 function radio(name){const el=document.querySelector('input[name="'+name+'"]:checked');return el?el.value:'—';}
+
+function formatDateDDMMYYYY(value){
+  if(!value)return '';
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(value))return value;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(value)){
+    const parts=value.split('-');
+    return parts[2]+'/'+parts[1]+'/'+parts[0];
+  }
+  return value;
+}
+
+function todayDDMMYYYY(){
+  const d=new Date();
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+
+function filenameDate(value){
+  return formatDateDDMMYYYY(value).replace(/\//g,'-');
+}
+
+async function getLogoAsDataURL(){
+  const logoPath='ecologo.png';
+
+  // First try loading the actual PNG file directly.
+  try{
+    const response=await fetch(logoPath,{cache:'no-store'});
+    if(response.ok){
+      const blob=await response.blob();
+      const dataUrl=await new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(reader.result);
+        reader.onerror=reject;
+        reader.readAsDataURL(blob);
+      });
+      return dataUrl;
+    }
+  }catch(error){
+    console.warn('Direct logo fetch failed. Trying displayed image instead.',error);
+  }
+
+  // Fallback: convert the visible header logo.
+  return new Promise(resolve=>{
+    const img=document.getElementById('ecologo');
+    if(!img){resolve(null);return;}
+
+    function convertLogo(){
+      try{
+        const width=img.naturalWidth||img.width;
+        const height=img.naturalHeight||img.height;
+        if(!width||!height){resolve(null);return;}
+
+        const canvas=document.createElement('canvas');
+        canvas.width=width;
+        canvas.height=height;
+        const ctx=canvas.getContext('2d');
+        ctx.clearRect(0,0,width,height);
+        ctx.drawImage(img,0,0,width,height);
+        resolve(canvas.toDataURL('image/png'));
+      }catch(error){
+        console.error('Logo conversion failed:',error);
+        resolve(null);
+      }
+    }
+
+    if(img.complete&&img.naturalWidth>0){
+      convertLogo();
+    }else{
+      img.addEventListener('load',convertLogo,{once:true});
+      img.addEventListener('error',()=>resolve(null),{once:true});
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  const dateInput=document.getElementById('install_date');
+  if(!dateInput)return;
+  dateInput.addEventListener('input',function(){
+    let digits=this.value.replace(/\D/g,'').slice(0,8);
+    if(digits.length>4)digits=digits.slice(0,2)+'/'+digits.slice(2,4)+'/'+digits.slice(4);
+    else if(digits.length>2)digits=digits.slice(0,2)+'/'+digits.slice(2);
+    this.value=digits;
+  });
+});
  
 function clearErrors(){document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));document.getElementById('val-banner').style.display='none';}
 function validate(){
   clearErrors();
   const errors=[];
   function req(fieldId,wrapperId,label){if(!v(fieldId)){const el=document.getElementById(wrapperId);if(el)el.classList.add('field-error');errors.push(label);}}
-  req('client','f-client','Client Name');req('address','f-address','Address');req('site_address','f-site_address','Site Address');req('operatives','f-operatives','Names of Operatives');req('install_date','f-install_date','Installation Date');req('survey','f-survey','Was a site survey performed?');req('approved','f-approved','Was the building approved for CWI?');req('holes_filled','f-holes_filled','Have all holes been filled?');req('sig_name','f-sig_name','Operative Name (Sign-off)');
+  req('client','f-client','Client Name');req('address','f-address','Address');req('site_address','f-site_address','Site Address');req('operatives','f-operatives','Names of Operatives');req('install_date','f-install_date','Installation Date');if(v('install_date')&&!/^\d{2}\/\d{2}\/\d{4}$/.test(v('install_date'))){document.getElementById('f-install_date').classList.add('field-error');errors.push('Installation Date must be DD/MM/YYYY');}req('survey','f-survey','Was a site survey performed?');req('approved','f-approved','Was the building approved for CWI?');req('holes_filled','f-holes_filled','Have all holes been filled?');req('sig_name','f-sig_name','Operative Name (Sign-off)');
   if(!signatureDrawn){const el=document.getElementById('f-signature');if(el)el.classList.add('field-error');errors.push('Operative Signature');}
   if(errors.length){const banner=document.getElementById('val-banner');document.getElementById('val-list').innerHTML=errors.map(e=>'<li>'+e+'</li>').join('');banner.style.display='block';banner.scrollIntoView({behavior:'smooth',block:'start'});return false;}
   return true;
@@ -218,6 +301,10 @@ async function generatePDF(){
   const btn=document.querySelector('.submit-btn'),msg=document.getElementById('gen_msg');
   btn.disabled=true;btn.textContent='Generating...';msg.style.display='block';
   await new Promise(r=>setTimeout(r,50));
+  const logoData=await getLogoAsDataURL();
+  if(!logoData){
+    alert('The PDF could not load ecologo.png. Make sure ecologo.png is in the same folder as this HTML file and that the page is opened through your website, not directly as a local file.');
+  }
  
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
@@ -227,7 +314,31 @@ async function generatePDF(){
  
   function newPage(){doc.addPage();y=0;drawHeader();}
   function check(h){if(y+h>PH-60)newPage();}
-  function drawHeader(){doc.setFillColor(...GREEN);doc.rect(0,0,PW,70,'F');doc.setFillColor(...MIDGREEN);doc.rect(0,66,PW,4,'F');doc.setTextColor(...WHITE);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('CW Site Installation Checksheet',PW/2,30,{align:'center'});doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text('KF 04  |  Issue No. 1  |  Issue Date 15/02/2017',PW/2,46,{align:'center'});const dt=v('install_date')||new Date().toISOString().slice(0,10);doc.setFillColor(...MIDGREEN);doc.roundedRect(PW-M-110,10,110,22,4,4,'F');doc.setTextColor(...WHITE);doc.setFontSize(9);doc.text(dt,PW-M-55,24,{align:'center'});y=86;}
+  function drawHeader(){
+    doc.setFillColor(...GREEN);doc.rect(0,0,PW,70,'F');
+    doc.setFillColor(...MIDGREEN);doc.rect(0,66,PW,4,'F');
+    if(logoData){
+      try{
+        const props=doc.getImageProperties(logoData);
+        const maxW=72;
+        const maxH=50;
+        const ratio=Math.min(maxW/props.width,maxH/props.height);
+        const logoW=props.width*ratio;
+        const logoH=props.height*ratio;
+        doc.addImage(logoData,'PNG',M,10,logoW,logoH);
+      }catch(error){
+        console.error('Could not add logo to PDF:',error);
+      }
+    }
+    doc.setTextColor(...WHITE);doc.setFontSize(16);doc.setFont('helvetica','bold');
+    doc.text('CW Site Installation Checksheet',PW/2,30,{align:'center'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text('KF 04  |  Issue No. 1  |  Issue Date 15/02/2017',PW/2,46,{align:'center'});
+    const dt=formatDateDDMMYYYY(v('install_date'))||todayDDMMYYYY();
+    doc.setFillColor(...MIDGREEN);doc.roundedRect(PW-M-110,10,110,22,4,4,'F');
+    doc.setTextColor(...WHITE);doc.setFontSize(9);doc.text(dt,PW-M-55,24,{align:'center'});
+    y=86;
+  }
   function drawFooter(){const pages=doc.internal.getNumberOfPages();for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFillColor(...GREEN);doc.rect(0,PH-36,PW,36,'F');doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text('Ecospec  |  CW Site Installation Checksheet  |  KF 04',M,PH-16);doc.text('Page '+i+' of '+pages,PW-M,PH-16,{align:'right'});}}
   function sectionBanner(title){check(32);doc.setFillColor(...MIDGREEN);doc.rect(M,y,4,26,'F');doc.setFillColor(...LIGHTGREEN);doc.rect(M+4,y,CW-4,26,'F');doc.setDrawColor(...MIDGREEN);doc.setLineWidth(0.5);doc.line(M,y+26,M+CW,y+26);doc.setTextColor(...GREEN);doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text(title.toUpperCase(),M+14,y+17);y+=32;}
   function subBanner(title){check(20);doc.setFillColor(...STRIPE);doc.rect(M,y,CW,18,'F');doc.setDrawColor(...BORDER);doc.setLineWidth(0.3);doc.line(M,y+18,M+CW,y+18);doc.setTextColor(...MIDGREEN);doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.text(title.toUpperCase(),M+8,y+12);y+=20;}
@@ -319,7 +430,7 @@ async function generatePDF(){
   drawHeader();
  
   sectionBanner('Project Details');
-  fieldRow('Client Name',v('client'),false);fieldRow('Job Reference',v('job_ref'),true);fieldRow('Address',v('address'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',v('install_date'),true);
+  fieldRow('Client Name',v('client'),false);fieldRow('Job Reference',v('job_ref'),true);fieldRow('Address',v('address'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',formatDateDDMMYYYY(v('install_date')),true);
   y+=6;subBanner('Site Survey & Approval');
   fieldRow('Was a site survey performed?',v('survey'),false);fieldRow('Was the building approved for CWI?',v('approved'),true);
   noteBlock('Special Instructions from Site Survey',v('special_instructions'));
@@ -368,11 +479,12 @@ async function generatePDF(){
   y+=182;
  
   photoPages();drawFooter();
-  const dt2=v('install_date')||new Date().toISOString().slice(0,10);
+  const dt2=filenameDate(v('install_date'))||filenameDate(todayDDMMYYYY());
   doc.save((v('client')||'Client').replace(/[^a-z0-9]/gi,'_')+'_CW_Checksheet_'+dt2+'.pdf');
   btn.disabled=false;btn.textContent='Generate PDF Report';msg.style.display='none';
 }
 </script>
 </body>
 </html>
+ 
  
