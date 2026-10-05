@@ -66,7 +66,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 </div>
  
 <h1>CW Site Installation Checksheet</h1>
-<div class="doc-ref">KF 04 &nbsp;|&nbsp; Issue No. 1 &nbsp;|&nbsp; Issue Date 15/02/2017</div>
+
  
 <div id="val-banner"><strong>&#9888; Please complete all required fields before generating the PDF:</strong><ul id="val-list"></ul></div>
 
@@ -343,7 +343,7 @@ async function generatePDF(){
     doc.setTextColor(...WHITE);doc.setFontSize(16);doc.setFont('helvetica','bold');
     doc.text('CW Site Installation Checksheet',PW/2,30,{align:'center'});
     doc.setFontSize(8);doc.setFont('helvetica','normal');
-    doc.text('KF 04  |  Issue No. 1  |  Issue Date 15/02/2017',PW/2,46,{align:'center'});
+
     const dt=formatDateDDMMYYYY(v('install_date'))||todayDDMMYYYY();
     doc.setFillColor(...MIDGREEN);doc.roundedRect(PW-M-110,10,110,22,4,4,'F');
     doc.setTextColor(...WHITE);doc.setFontSize(9);doc.text(dt,PW-M-55,24,{align:'center'});
