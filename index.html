@@ -395,11 +395,7 @@ async function generatePDF(){
     }
     const titleX=266;
     doc.setTextColor(...WHITE);doc.setFontSize(14);doc.setFont('helvetica','bold');
-    doc.text('CW Site Installation',titleX,26,{align:'center'});
-    doc.text('Checksheet',titleX,43,{align:'center'});
-    const dt=formatDateDDMMYYYY(v('install_date'))||todayDDMMYYYY();
-    doc.setFontSize(9);doc.setFont('helvetica','normal');
-    doc.text(dt,titleX,58,{align:'center'});
+    doc.text('CW WORKSHEET',titleX,38,{align:'center'});
 
     // Fillable invoice reference field in the first-page header.
     if(doc.internal.getNumberOfPages()===1){
