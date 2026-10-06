@@ -358,6 +358,29 @@ async function generatePDF(){
     const dt=formatDateDDMMYYYY(v('install_date'))||todayDDMMYYYY();
     doc.setFillColor(...MIDGREEN);doc.roundedRect(PW-M-110,10,110,22,4,4,'F');
     doc.setTextColor(...WHITE);doc.setFontSize(9);doc.text(dt,PW-M-55,24,{align:'center'});
+    // Editable invoice number on the first page, below the existing date.
+    if(doc.internal.getCurrentPageInfo().pageNumber===1){
+      const invoiceX=PW-M-110;
+      doc.setTextColor(...WHITE);
+      doc.setFontSize(7);
+      doc.setFont('helvetica','bold');
+      doc.text('Invoice No.',invoiceX,42);
+      doc.setFillColor(...WHITE);
+      doc.setDrawColor(...BORDER);
+      doc.setLineWidth(0.5);
+      doc.rect(invoiceX,45,110,18,'FD');
+      const invoiceField=new window.jspdf.AcroFormTextField();
+      invoiceField.fieldName='InvoiceNumber';
+      invoiceField.Rect=[invoiceX,45,110,18];
+      invoiceField.fontName='helvetica';
+      invoiceField.fontSize=10;
+      invoiceField.maxFontSize=10;
+      invoiceField.value='';
+      invoiceField.defaultValue='';
+      invoiceField.multiline=false;
+      invoiceField.readOnly=false;
+      doc.addField(invoiceField);
+    }
     y=86;
   }
   function drawFooter(){const pages=doc.internal.getNumberOfPages();for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFillColor(...GREEN);doc.rect(0,PH-36,PW,36,'F');doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text('Ecospec  |  CW Site Installation Checksheet  |',M,PH-16);doc.text('Page '+i+' of '+pages,PW-M,PH-16,{align:'right'});}}
