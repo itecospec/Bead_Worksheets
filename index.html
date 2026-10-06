@@ -69,6 +69,11 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 .submit-btn:hover{background:#235223}.submit-btn:active{opacity:0.85}
 .generating{text-align:center;font-size:13px;color:#4a8c4a;margin-top:8px;display:none}
 @media(max-width:560px){.row2{grid-template-columns:1fr}.flow-inputs{grid-template-columns:1fr 1fr}}
+.flow-sub .req{color:#cc0000;background:none}
+.flow-sub .err-msg{display:none;color:#cc0000;background:none}
+.flow-sub.field-error input{border-color:#cc0000;box-shadow:0 0 0 2px rgba(204,0,0,0.14)}
+.flow-sub.field-error .err-msg{display:block}
+.field-error .yna-group{outline:2px solid #cc0000}
 </style>
 </head>
 <body>
@@ -77,6 +82,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 </div>
  
 <h1>CW Site Installation Checksheet</h1>
+<p class="info-note">All fields, check responses, signature and at least one photo are required. Enter “None” or “N/A” in notes where appropriate.</p>
 
  
 <div id="val-banner"><strong>&#9888; Please complete all required fields before generating the PDF:</strong><ul id="val-list"></ul></div>
@@ -86,8 +92,9 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
   <div class="section-header"><h2>Project Details</h2></div>
   <div class="section-body open">
     <div class="field" id="f-client"><label>Client Name <span class="req">*</span></label><input type="text" id="client" placeholder="Client name"><span class="err-msg">Client Name is required</span></div>
-    <div class="field"><label>Job Reference</label><input type="text" id="job_ref" placeholder="Job Ref."></div>
-    <div class="field" id="f-address"><label>Address <span class="req">*</span></label><input type="text" id="address" placeholder="Client address"><span class="err-msg">Address is required</span></div>
+    <div class="field"><label>Customer Name</label><input type="text" id="customer" placeholder="Customer name"></div>
+    <div class="field"><label>Project Owner</label><input type="text" id="job_ref" placeholder="Project owner"></div>
+    <div class="field" id="f-address"><label>Address <span class="req">*</span></label><input type="text" id="address" placeholder="Customer address"><span class="err-msg">Address is required</span></div>
     <div class="field" id="f-site_address"><label>Site Address <span class="req">*</span></label><input type="text" id="site_address" placeholder="Installation site address"><span class="err-msg">Site Address is required</span></div>
     <div class="field" id="f-operatives"><label>Names of Operatives <span class="req">*</span></label><input type="text" id="operatives" placeholder="Names of all operatives on site"><span class="err-msg">Names of Operatives is required</span></div>
     <div class="field" id="f-install_date"><label>Installation Date <span class="req">*</span></label><input type="text" id="install_date" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10"><span class="err-msg">Installation Date is required</span></div>
@@ -185,7 +192,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
     <div class="info-note" style="font-size:13px;color:#2d6a2d;font-weight:500">Confirmation of completion of both Pre-Installation/Safety and Post-Installation/Safety Checks.</div>
     <div class="field" id="f-sig_name"><label>Operative Name (Block Capitals) <span class="req">*</span></label><input type="text" id="sig_name" placeholder="FULL NAME IN BLOCK CAPITALS" style="text-transform:uppercase"><span class="err-msg">Name is required</span></div>
     <div class="field" id="f-signature"><label>Operative Signature <span class="req">*</span></label><div class="signature-pad-container"><canvas id="signatureCanvas" class="signature-canvas"></canvas><div class="signature-actions"><button type="button" class="signature-btn clear-signature" onclick="clearSignature()">Clear Signature</button></div></div><p class="info-note" style="margin-top:8px">Sign using your finger or stylus directly on screen.</p><span class="err-msg">Signature is required</span></div>
-    <div class="field"><label>Photos</label></div>
+    <div class="field" id="f-photos"><label>Photos <span class="req">*</span></label><span class="err-msg">Attach at least one photo</span></div>
     <div style="border:2px dashed #a8d0a8;border-radius:8px;padding:1rem;text-align:center;cursor:pointer;background:#f8fff8" onclick="document.getElementById('photo_input').click()"><input type="file" id="photo_input" multiple accept="image/*" onchange="addPhotos(this)" style="display:none"><p style="font-size:13px;color:#4a8c4a;margin:0">&#128248; Tap to attach photos</p><p style="font-size:11px;color:#7ab07a;margin-top:4px">Multiple photos allowed — embedded in PDF</p></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px" id="photo_grid"></div>
   </div>
@@ -282,18 +289,55 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 });
  
-function clearErrors(){document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));document.getElementById('val-banner').style.display='none';}
+function fieldLabel(control){
+  const flow=control.closest('.flow-field');
+  if(flow)return flow.querySelector('.flow-label').textContent.replace(/\*/g,'').trim()+' — '+control.closest('.flow-sub').querySelector('span').textContent;
+  return control.closest('.field').querySelector('label').textContent.replace(/\*/g,'').trim();
+}
+function setupRequiredFields(){
+  document.querySelectorAll('.field input, .field textarea, .field select, .flow-sub input').forEach(control=>{
+    control.required=true;
+    const wrapper=control.closest('.field, .flow-sub');
+    const label=wrapper.querySelector('label, span');
+    if(!label.querySelector('.req')){const star=document.createElement('span');star.className='req';star.textContent=' *';label.appendChild(star);}
+    if(!wrapper.querySelector('.err-msg')){const msg=document.createElement('span');msg.className='err-msg';msg.textContent='This field is required';wrapper.appendChild(msg);}
+  });
+}
+setupRequiredFields();
+function clearErrors(){
+  document.querySelectorAll('.field-error').forEach(el=>el.classList.remove('field-error'));
+  document.querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));
+  document.getElementById('val-banner').style.display='none';
+}
 function validate(){
   clearErrors();
-  const errors=[];
-  function req(fieldId,wrapperId,label){if(!v(fieldId)){const el=document.getElementById(wrapperId);if(el)el.classList.add('field-error');errors.push(label);}}
-  if(!document.querySelector('input[name="bead_product"]:checked')){document.getElementById('f-bead_product').classList.add('field-error');errors.push('Bead Product');}
-  req('client','f-client','Client Name');req('address','f-address','Address');req('site_address','f-site_address','Site Address');req('operatives','f-operatives','Names of Operatives');req('install_date','f-install_date','Installation Date');if(v('install_date')&&!/^\d{2}\/\d{2}\/\d{4}$/.test(v('install_date'))){document.getElementById('f-install_date').classList.add('field-error');errors.push('Installation Date must be DD/MM/YYYY');}req('survey','f-survey','Was a site survey performed?');req('approved','f-approved','Was the building approved for CWI?');req('holes_filled','f-holes_filled','Have all holes been filled?');req('sig_name','f-sig_name','Operative Name (Sign-off)');
-  if(!signatureDrawn){const el=document.getElementById('f-signature');if(el)el.classList.add('field-error');errors.push('Operative Signature');}
-  if(errors.length){const banner=document.getElementById('val-banner');document.getElementById('val-list').innerHTML=errors.map(e=>'<li>'+e+'</li>').join('');banner.style.display='block';banner.scrollIntoView({behavior:'smooth',block:'start'});return false;}
+  const errors=[],radioGroups=new Set();
+  function fail(wrapper,label,control){wrapper.classList.add('field-error');if(control)control.setAttribute('aria-invalid','true');errors.push(label);}
+  document.querySelectorAll('.field input, .field textarea, .field select, .flow-sub input').forEach(control=>{
+    if(control.disabled)return;
+    const wrapper=control.closest('.field, .flow-sub');
+    if(control.type==='radio'){
+      if(radioGroups.has(control.name))return;
+      radioGroups.add(control.name);
+      if(!Array.from(document.getElementsByName(control.name)).some(input=>input.checked))fail(wrapper,fieldLabel(control),control);
+    }else if(!control.value.trim())fail(wrapper,fieldLabel(control),control);
+    else if(!control.checkValidity())fail(wrapper,fieldLabel(control)+' — enter a valid value',control);
+  });
+  const date=v('install_date'),parts=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(date);
+  if(date){
+    const parsed=parts?new Date(Number(parts[3]),Number(parts[2])-1,Number(parts[1])):null;
+    if(!parts||parsed.getFullYear()!==Number(parts[3])||parsed.getMonth()!==Number(parts[2])-1||parsed.getDate()!==Number(parts[1]))fail(document.getElementById('f-install_date'),'Installation Date must be a valid date in DD/MM/YYYY format',document.getElementById('install_date'));
+  }
+  if(!signatureDrawn)fail(document.getElementById('f-signature'),'Operative Signature');
+  if(!attachedPhotos.length)fail(document.getElementById('f-photos'),'Attach at least one photo');
+  if(errors.length){
+    const banner=document.getElementById('val-banner'),list=document.getElementById('val-list');
+    list.replaceChildren();errors.forEach(error=>{const li=document.createElement('li');li.textContent=error;list.appendChild(li);});
+    banner.style.display='block';banner.scrollIntoView({behavior:'smooth',block:'start'});return false;
+  }
   return true;
 }
- 
+
 let signatureCanvas,sigCtx,drawing=false,signatureDrawn=false;
 function setupSignaturePad(){
   signatureCanvas=document.getElementById('signatureCanvas');if(!signatureCanvas)return;
@@ -358,29 +402,6 @@ async function generatePDF(){
     const dt=formatDateDDMMYYYY(v('install_date'))||todayDDMMYYYY();
     doc.setFillColor(...MIDGREEN);doc.roundedRect(PW-M-110,10,110,22,4,4,'F');
     doc.setTextColor(...WHITE);doc.setFontSize(9);doc.text(dt,PW-M-55,24,{align:'center'});
-    // Editable invoice number on the first page, below the existing date.
-    if(doc.internal.getCurrentPageInfo().pageNumber===1){
-      const invoiceX=PW-M-110;
-      doc.setTextColor(...WHITE);
-      doc.setFontSize(7);
-      doc.setFont('helvetica','bold');
-      doc.text('Invoice No.',invoiceX,42);
-      doc.setFillColor(...WHITE);
-      doc.setDrawColor(...BORDER);
-      doc.setLineWidth(0.5);
-      doc.rect(invoiceX,45,110,18,'FD');
-      const invoiceField=new window.jspdf.AcroFormTextField();
-      invoiceField.fieldName='InvoiceNumber';
-      invoiceField.Rect=[invoiceX,45,110,18];
-      invoiceField.fontName='helvetica';
-      invoiceField.fontSize=10;
-      invoiceField.maxFontSize=10;
-      invoiceField.value='';
-      invoiceField.defaultValue='';
-      invoiceField.multiline=false;
-      invoiceField.readOnly=false;
-      doc.addField(invoiceField);
-    }
     y=86;
   }
   function drawFooter(){const pages=doc.internal.getNumberOfPages();for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFillColor(...GREEN);doc.rect(0,PH-36,PW,36,'F');doc.setTextColor(...WHITE);doc.setFontSize(8);doc.setFont('helvetica','normal');doc.text('Ecospec  |  CW Site Installation Checksheet  |',M,PH-16);doc.text('Page '+i+' of '+pages,PW-M,PH-16,{align:'right'});}}
@@ -473,8 +494,23 @@ async function generatePDF(){
  
   drawHeader();
 
+  // Blank invoice reference box on the first page only.
+  const invoiceBoxHeight=40,invoiceLabelWidth=122;
+  doc.setFillColor(...WHITE);
+  doc.setDrawColor(...MIDGREEN);
+  doc.setLineWidth(0.8);
+  doc.rect(M,y,CW,invoiceBoxHeight,'FD');
+  doc.setFillColor(...LIGHTGREEN);
+  doc.rect(M+0.4,y+0.4,invoiceLabelWidth-0.4,invoiceBoxHeight-0.8,'F');
+  doc.line(M+invoiceLabelWidth,y,M+invoiceLabelWidth,y+invoiceBoxHeight);
+  doc.setTextColor(...GREEN);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('Invoice Number(s)',M+10,y+24);
+  y+=invoiceBoxHeight+12;
+
   sectionBanner('Project Details');
-  fieldRow('Client Name',v('client'),false);fieldRow('Job Reference',v('job_ref'),true);fieldRow('Address',v('address'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',formatDateDDMMYYYY(v('install_date')),true);
+  fieldRow('Client Name',v('client'),false);fieldRow('Customer Name',v('customer'),true);fieldRow('Project Owner',v('job_ref'),false);fieldRow('Address',v('address'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',formatDateDDMMYYYY(v('install_date')),true);
   y+=6;subBanner('Site Survey & Approval');
   fieldRow('Was a site survey performed?',v('survey'),false);fieldRow('Was the building approved for CWI?',v('approved'),true);
   noteBlock('Special Instructions from Site Survey',v('special_instructions'));
@@ -524,8 +560,10 @@ async function generatePDF(){
   y+=182;
  
   photoPages();drawFooter();
-  const dt2=filenameDate(v('install_date'))||filenameDate(todayDDMMYYYY());
-  doc.save((v('client')||'Client').replace(/[^a-z0-9]/gi,'_')+'_CW_Checksheet_'+dt2+'.pdf');
+  const filenameNames=[v('client'),v('customer')]
+    .map(name=>name.replace(/[<>:"/\\|?*\x00-\x1F]/g,'-').trim())
+    .filter(Boolean).join(' - ');
+  doc.save((filenameNames ? filenameNames+' ' : '')+'CW Worksheet.pdf');
   btn.disabled=false;btn.textContent='Generate PDF Report';msg.style.display='none';
 }
 </script>
