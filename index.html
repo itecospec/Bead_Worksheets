@@ -93,15 +93,14 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
     <div class="field" id="f-client"><label>Client Name <span class="req">*</span></label><input type="text" id="client" placeholder="Client name"><span class="err-msg">Client Name is required</span></div>
     <div class="field"><label>Customer Name</label><input type="text" id="customer" placeholder="Customer name"></div>
     <div class="field"><label>Project Owner</label><input type="text" id="job_ref" placeholder="Project owner"></div>
-    <div class="field" id="f-address"><label>Address <span class="req">*</span></label><input type="text" id="address" placeholder="Customer address"><span class="err-msg">Address is required</span></div>
     <div class="field" id="f-site_address"><label>Site Address <span class="req">*</span></label><input type="text" id="site_address" placeholder="Installation site address"><span class="err-msg">Site Address is required</span></div>
     <div class="field" id="f-operatives"><label>Names of Operatives <span class="req">*</span></label><input type="text" id="operatives" placeholder="Names of all operatives on site"><span class="err-msg">Names of Operatives is required</span></div>
     <div class="field" id="f-install_date"><label>Installation Date <span class="req">*</span></label><input type="text" id="install_date" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10"><span class="err-msg">Installation Date is required</span></div>
  
     <div class="subsection-label">Site Survey &amp; Approval</div>
-    <div class="field" id="f-survey"><label>Was a site survey performed? <span class="req">*</span></label><select id="survey"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select><span class="err-msg">Please select an option</span></div>
-    <div class="field" id="f-approved"><label>Was the building approved for CWI? <span class="req">*</span></label><select id="approved"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select><span class="err-msg">Please select an option</span></div>
-    <div class="field"><label>Any special instructions from site survey?</label><textarea id="special_instructions" placeholder="Enter any special instructions..."></textarea></div>
+    <div class="field" id="f-survey"><label>Was a site survey performed?</label><select data-optional="true" id="survey"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select><span class="err-msg">Please select an option</span></div>
+    <div class="field" id="f-approved"><label>Was the building approved for CWI?</label><select data-optional="true" id="approved"><option value="">Select...</option><option value="Yes">Yes</option><option value="No">No</option></select><span class="err-msg">Please select an option</span></div>
+    <div class="field"><label>Any special instructions from site survey?</label><textarea data-optional="true" id="special_instructions" placeholder="Enter any special instructions..."></textarea></div>
  
     <div class="subsection-label">Certification</div>
     <div class="cert-row">
@@ -295,6 +294,7 @@ function fieldLabel(control){
 }
 function setupRequiredFields(){
   document.querySelectorAll('.field input, .field textarea, .field select, .flow-sub input').forEach(control=>{
+    if(control.dataset.optional==='true'){control.required=false;return;}
     control.required=true;
     const wrapper=control.closest('.field, .flow-sub');
     const label=wrapper.querySelector('label, span');
@@ -313,7 +313,7 @@ function validate(){
   const errors=[],radioGroups=new Set();
   function fail(wrapper,label,control){wrapper.classList.add('field-error');if(control)control.setAttribute('aria-invalid','true');errors.push(label);}
   document.querySelectorAll('.field input, .field textarea, .field select, .flow-sub input').forEach(control=>{
-    if(control.disabled)return;
+    if(control.disabled||!control.required)return;
     const wrapper=control.closest('.field, .flow-sub');
     if(control.type==='radio'){
       if(radioGroups.has(control.name))return;
@@ -508,7 +508,7 @@ async function generatePDF(){
   y+=invoiceBoxHeight+12;
 
   sectionBanner('Project Details');
-  fieldRow('Client Name',v('client'),false);fieldRow('Customer Name',v('customer'),true);fieldRow('Project Owner',v('job_ref'),false);fieldRow('Address',v('address'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',formatDateDDMMYYYY(v('install_date')),true);
+  fieldRow('Client Name',v('client'),false);fieldRow('Customer Name',v('customer'),true);fieldRow('Project Owner',v('job_ref'),false);fieldRow('Site Address',v('site_address'),true);fieldRow('Names of Operatives',v('operatives'),false);fieldRow('Installation Date',formatDateDDMMYYYY(v('install_date')),true);
   y+=6;subBanner('Site Survey & Approval');
   fieldRow('Was a site survey performed?',v('survey'),false);fieldRow('Was the building approved for CWI?',v('approved'),true);
   noteBlock('Special Instructions from Site Survey',v('special_instructions'));
