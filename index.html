@@ -82,7 +82,6 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
 </div>
  
 <h1>CW Site Installation Checksheet</h1>
-<p class="info-note">All fields, check responses, signature and at least one photo are required. Enter “None” or “N/A” in notes where appropriate.</p>
 
  
 <div id="val-banner"><strong>&#9888; Please complete all required fields before generating the PDF:</strong><ul id="val-list"></ul></div>
@@ -192,7 +191,7 @@ h1{font-size:15px;font-weight:600;color:#4a8c4a;text-align:center;margin-bottom:
     <div class="info-note" style="font-size:13px;color:#2d6a2d;font-weight:500">Confirmation of completion of both Pre-Installation/Safety and Post-Installation/Safety Checks.</div>
     <div class="field" id="f-sig_name"><label>Operative Name (Block Capitals) <span class="req">*</span></label><input type="text" id="sig_name" placeholder="FULL NAME IN BLOCK CAPITALS" style="text-transform:uppercase"><span class="err-msg">Name is required</span></div>
     <div class="field" id="f-signature"><label>Operative Signature <span class="req">*</span></label><div class="signature-pad-container"><canvas id="signatureCanvas" class="signature-canvas"></canvas><div class="signature-actions"><button type="button" class="signature-btn clear-signature" onclick="clearSignature()">Clear Signature</button></div></div><p class="info-note" style="margin-top:8px">Sign using your finger or stylus directly on screen.</p><span class="err-msg">Signature is required</span></div>
-    <div class="field" id="f-photos"><label>Photos <span class="req">*</span></label><span class="err-msg">Attach at least one photo</span></div>
+    <div class="field" id="f-photos"><label>Photos (optional)</label></div>
     <div style="border:2px dashed #a8d0a8;border-radius:8px;padding:1rem;text-align:center;cursor:pointer;background:#f8fff8" onclick="document.getElementById('photo_input').click()"><input type="file" id="photo_input" multiple accept="image/*" onchange="addPhotos(this)" style="display:none"><p style="font-size:13px;color:#4a8c4a;margin:0">&#128248; Tap to attach photos</p><p style="font-size:11px;color:#7ab07a;margin-top:4px">Multiple photos allowed — embedded in PDF</p></div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px" id="photo_grid"></div>
   </div>
@@ -329,7 +328,6 @@ function validate(){
     if(!parts||parsed.getFullYear()!==Number(parts[3])||parsed.getMonth()!==Number(parts[2])-1||parsed.getDate()!==Number(parts[1]))fail(document.getElementById('f-install_date'),'Installation Date must be a valid date in DD/MM/YYYY format',document.getElementById('install_date'));
   }
   if(!signatureDrawn)fail(document.getElementById('f-signature'),'Operative Signature');
-  if(!attachedPhotos.length)fail(document.getElementById('f-photos'),'Attach at least one photo');
   if(errors.length){
     const banner=document.getElementById('val-banner'),list=document.getElementById('val-list');
     list.replaceChildren();errors.forEach(error=>{const li=document.createElement('li');li.textContent=error;list.appendChild(li);});
