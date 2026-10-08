@@ -513,8 +513,10 @@ async function generatePDF(){
   y+=6;subBanner('Site Survey & Approval');
   fieldRow('Was a site survey performed?',v('survey'),false);fieldRow('Was the building approved for CWI?',v('approved'),true);
   noteBlock('Special Instructions from Site Survey',v('special_instructions'));
-  y+=4;subBanner('Certification');
-  fieldRow2('Approved Installer NSAI No.','0293/314','Agrément Cert No.','07/0293',false);y+=10;
+  if(radio('bead_product') === 'Kore Bead'){
+    y+=4;subBanner('Certification');
+    fieldRow2('Approved Installer NSAI No.','0293/314','Agrément Cert No.','07/0293',false);y+=10;
+  }
  
   sectionBanner('Pre-Installation Checks');
   subBanner('Bead & Glue');
